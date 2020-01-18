@@ -1,0 +1,7 @@
+---
+ - hosts: PrometheusServer
+   become: true
+   roles:
+     - prometheus
+     - node_exporter  
+

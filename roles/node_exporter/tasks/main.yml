@@ -1,0 +1,50 @@
+---
+# tasks file for node_exporter
+    - name: Creating the Process user for Node Exporter
+      user: 
+        name: "{{ node_exporter_user }}"
+        shell: "/bin/false"
+        create_home: "no"
+
+    - name: Downloading Node Exporter Installion
+      unarchive:
+        src: "{{ node_exporter_install_url }}"
+        dest: "/tmp"
+        remote_src: "yes"
+
+    - name: Copy file node_exporter with owner and permissions to bin folder
+      copy:
+        src: "/tmp/{{ node_exporter_folder }}/node_exporter"
+        dest: "/usr/local/bin/"
+        owner: "{{ node_exporter_user }}"
+        group: "{{ node_exporter_user }}"
+        remote_src: "yes"
+        mode: "0755"
+
+    - name: Delete node exporter tar.gz folder from tmp folder
+      file:
+        path: "/tmp/{{ node_exporter_folder }}.tar.gz"
+        state: "absent"
+    
+    - name: Delete node exporter folder from tmp folder
+      file:
+        path: "/tmp/{{ node_exporter_folder }}"
+        state: "absent"
+
+    - name: Copy file Node Exporter service
+      copy:
+        src: "files/node_exporter.service"
+        dest: "/etc/systemd/system/node_exporter.service"
+        owner: "{{ node_exporter_user }}"
+        group: "{{ node_exporter_user }}"
+        mode: "0755"
+
+    - name: Just force systemd to reload configs
+      systemd:
+        daemon_reload: "yes"
+
+    - name: Start node_exporter service
+      service:
+        name: "{{ node_exporter_user }}"
+        state: "started"
+        enabled: "yes"

@@ -1,0 +1,5 @@
+---
+# defaults file for prometheus
+prometheus_exporters_location: "/usr/local/bin/prometheus"
+prometheus_install_url: "https://github.com/prometheus/prometheus/releases/download/v2.0.0/prometheus-2.0.0.linux-amd64.tar.gz"
+prometheus_folder: "prometheus-2.0.0.linux-amd64"

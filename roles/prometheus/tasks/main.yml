@@ -1,0 +1,93 @@
+---
+# tasks file for prometheus
+    - name: Creating the Process user for Prometheus
+      user: 
+        name: "{{ prometheus_user }}"
+        shell: "/bin/false"
+        create_home: "no"
+
+    - name: Creating the Prometheus Configuration Directory in etc
+      file:
+        path: "/etc/prometheus"
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_user }}"
+        state: "directory"        
+
+    - name: Creating the Prometheus Configuration Directory in lib
+      file:
+        path: "/var/lib/prometheus"
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_user }}"
+        state: "directory"        
+
+    - name: Downloading Prometheus Installion
+      unarchive:
+        src: "{{ prometheus_install_url }}"
+        dest: "/tmp"
+        remote_src: "yes"        
+
+    - name: Copy file prometheus with owner and permissions to bin folder
+      copy:
+        src: "/tmp/{{ prometheus_folder }}/prometheus"
+        dest: "/usr/local/bin/"
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_user }}"
+        remote_src: "yes"
+        mode: "0755"        
+
+    - name: Copy folder promtool with owner and permissions to bin folder
+      copy:
+        src: "/tmp/{{ prometheus_folder }}/promtool"
+        dest: "/usr/local/bin/"
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_user }}"
+        remote_src: "yes"
+        mode: "0755"        
+
+    - name: Copy folder consoles  with owner and permissions to etc folder
+      copy:
+        src: "/tmp/{{ prometheus_folder }}/consoles"
+        dest: "/etc/prometheus"
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_user }}"
+        remote_src: "yes"
+    
+    - name: Copy folder console_libraries with owner and permissions to etc folder
+      copy:
+        src: "/tmp/{{ prometheus_folder }}/console_libraries"
+        dest: "/etc/prometheus"
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_user }}"
+        remote_src: "yes"        
+
+    - name: Delete prometheus tar.gz folder from tmp folder
+      file:
+        path: "/tmp/{{ prometheus_folder }}.tar.gz"
+        state: "absent"
+
+    - name: Delete prometheus folder from tmp folder
+      file:
+        path: "/tmp/{{ prometheus_folder }}"
+        state: "absent"        
+
+    - name: Copy file prometheus.yml to etc folder
+      copy:
+        src: "files/prometheus.yml"
+        dest: "/etc/prometheus/prometheus.yml"
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_user }}"
+
+    - name: Copy file Prometheus service
+      template:
+        src: "prometheus.service.j2"
+        dest: "/etc/systemd/system/prometheus.service"
+        owner: "{{ prometheus_user }}"
+        group: "{{ prometheus_user }}"       
+      notify: 
+        - system reload daemon
+        - start prometheus
+
+    - name: "restart prometheus"
+      systemd:
+        name: "prometheus"
+        state: "restarted"
