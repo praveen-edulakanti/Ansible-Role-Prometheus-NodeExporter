@@ -10,5 +10,4 @@
     name: "prometheus"
     state: "started"
     enabled: "yes"
-    listen: "start prometheus"
 
